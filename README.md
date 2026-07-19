@@ -229,7 +229,7 @@ These are custom dashboard colors; the category thresholds follow the US AQI sca
 - [Dashboard guide](docs/DASHBOARD_GUIDE.md)
 - [Refresh guide](docs/REFRESH_GUIDE.md)
 - [Troubleshooting](docs/TROUBLESHOOTING.md)
-- [GitHub upload guide](docs/GITHUB_UPLOAD_GUIDE.md)
+
 
 ## Attribution
 
