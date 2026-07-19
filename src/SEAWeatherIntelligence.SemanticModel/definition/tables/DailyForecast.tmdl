@@ -1,0 +1,95 @@
+table DailyForecast
+
+	column Date
+		dataType: dateTime
+		formatString: ddd, dd MMM
+		sourceColumn: Date
+
+	column WeatherCode
+		dataType: int64
+		isHidden
+		sourceColumn: WeatherCode
+
+	column MaxTemperature
+		dataType: double
+		isHidden
+		formatString: 0.0 °C
+		sourceColumn: MaxTemperature
+
+	column MinTemperature
+		dataType: double
+		isHidden
+		formatString: 0.0 °C
+		sourceColumn: MinTemperature
+
+	column PrecipProbabilityMax
+		dataType: double
+		isHidden
+		formatString: 0
+		sourceColumn: PrecipProbabilityMax
+
+	column PrecipitationSum
+		dataType: double
+		isHidden
+		formatString: 0.0 mm
+		sourceColumn: PrecipitationSum
+
+	column Sunrise
+		dataType: dateTime
+		isHidden
+		formatString: HH:mm
+		sourceColumn: Sunrise
+
+	column Sunset
+		dataType: dateTime
+		isHidden
+		formatString: HH:mm
+		sourceColumn: Sunset
+
+	column WindSpeedMax
+		dataType: double
+		isHidden
+		formatString: 0.0 km/h
+		sourceColumn: WindSpeedMax
+
+	column CityKey
+		dataType: int64
+		isHidden
+		sourceColumn: CityKey
+
+	column WeatherCondition
+		dataType: string
+		sourceColumn: WeatherCondition
+
+	column DayName
+		dataType: string
+		sourceColumn: DayName
+
+	partition DailyForecast = m
+		mode: import
+		source =
+				let
+				    Loc = Table.ToRecords(LocationsBase),
+				    Raw = ForecastResponse,
+				    CityTables = List.Transform(List.Positions(Raw), (i) =>
+				        let
+				            D = Raw{i}[daily],
+				            T0 = Table.FromColumns(
+				                {D[time], D[weather_code], D[temperature_2m_max], D[temperature_2m_min], D[precipitation_probability_max], D[precipitation_sum], D[sunrise], D[sunset], D[wind_speed_10m_max]},
+				                {"Date", "WeatherCode", "MaxTemperature", "MinTemperature", "PrecipProbabilityMax", "PrecipitationSum", "Sunrise", "Sunset", "WindSpeedMax"}
+				            ),
+				            T1 = Table.AddColumn(T0, "CityKey", each Loc{i}[CityKey], Int64.Type),
+				            T2 = Table.AddColumn(T1, "WeatherCondition", each fxWeatherDescription(Number.From([WeatherCode])), type text),
+				            T3 = Table.AddColumn(T2, "DayName", each Date.ToText(Date.From([Date]), "ddd", "en-US"), type text)
+				        in
+				            T3
+				    ),
+				    Combined = Table.Combine(CityTables),
+				    Typed = Table.TransformColumnTypes(Combined, {
+				        {"Date", type date}, {"WeatherCode", Int64.Type}, {"MaxTemperature", type number}, {"MinTemperature", type number},
+				        {"PrecipProbabilityMax", type number}, {"PrecipitationSum", type number}, {"Sunrise", type datetime}, {"Sunset", type datetime},
+				        {"WindSpeedMax", type number}, {"CityKey", Int64.Type}, {"WeatherCondition", type text}, {"DayName", type text}
+				    })
+				in
+				    Typed
+

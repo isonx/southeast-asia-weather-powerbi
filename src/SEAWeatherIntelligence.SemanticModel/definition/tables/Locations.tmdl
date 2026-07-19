@@ -1,0 +1,36 @@
+table Locations
+
+	column CityKey
+		dataType: int64
+		isHidden
+		sourceColumn: CityKey
+
+	column City
+		dataType: string
+		sourceColumn: City
+
+	column Country
+		dataType: string
+		sourceColumn: Country
+
+	column Latitude
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: Latitude
+
+	column Longitude
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: Longitude
+
+	column Timezone
+		dataType: string
+		isHidden
+		sourceColumn: Timezone
+
+	partition Locations = m
+		mode: import
+		source = LocationsBase
+

@@ -1,0 +1,85 @@
+table AirQuality
+
+	column CityKey
+		dataType: int64
+		isHidden
+		sourceColumn: CityKey
+
+	column UpdatedAt
+		dataType: dateTime
+		formatString: dd MMM yyyy HH:mm
+		sourceColumn: UpdatedAt
+
+	column USAQI
+		dataType: double
+		isHidden
+		sourceColumn: USAQI
+
+	column EuropeanAQI
+		dataType: double
+		isHidden
+		sourceColumn: EuropeanAQI
+
+	column PM10
+		dataType: double
+		isHidden
+		sourceColumn: PM10
+
+	column PM2_5
+		dataType: double
+		isHidden
+		sourceColumn: PM2_5
+
+	column CarbonMonoxide
+		dataType: double
+		isHidden
+		sourceColumn: CarbonMonoxide
+
+	column NitrogenDioxide
+		dataType: double
+		isHidden
+		sourceColumn: NitrogenDioxide
+
+	column SulphurDioxide
+		dataType: double
+		isHidden
+		sourceColumn: SulphurDioxide
+
+	column Ozone
+		dataType: double
+		isHidden
+		sourceColumn: Ozone
+
+	partition AirQuality = m
+		mode: import
+		source =
+				let
+				    Loc = Table.ToRecords(LocationsBase),
+				    Raw = AirQualityResponse,
+				    Rows = List.Transform(List.Positions(Raw), (i) =>
+				        let
+				            R = Raw{i},
+				            C = R[current]
+				        in
+				            [
+				                CityKey = Loc{i}[CityKey],
+				                UpdatedAt = try DateTime.FromText(C[time]) otherwise null,
+				                USAQI = try Number.From(C[us_aqi]) otherwise null,
+				                EuropeanAQI = try Number.From(C[european_aqi]) otherwise null,
+				                PM10 = try Number.From(C[pm10]) otherwise null,
+				                PM2_5 = try Number.From(C[pm2_5]) otherwise null,
+				                CarbonMonoxide = try Number.From(C[carbon_monoxide]) otherwise null,
+				                NitrogenDioxide = try Number.From(C[nitrogen_dioxide]) otherwise null,
+				                SulphurDioxide = try Number.From(C[sulphur_dioxide]) otherwise null,
+				                Ozone = try Number.From(C[ozone]) otherwise null
+				            ]
+				    ),
+				    T = Table.FromRecords(Rows),
+				    Typed = Table.TransformColumnTypes(T, {
+				        {"CityKey", Int64.Type}, {"UpdatedAt", type datetime}, {"USAQI", type number}, {"EuropeanAQI", type number},
+				        {"PM10", type number}, {"PM2_5", type number}, {"CarbonMonoxide", type number}, {"NitrogenDioxide", type number},
+				        {"SulphurDioxide", type number}, {"Ozone", type number}
+				    })
+				in
+				    Typed
+

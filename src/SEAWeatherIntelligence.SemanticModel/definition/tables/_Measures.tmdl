@@ -1,0 +1,134 @@
+table _Measures
+
+	measure 'Selected City' = SELECTEDVALUE(Locations[City], "Bangkok")
+		displayFolder: Context
+
+	measure 'Selected Country' = SELECTEDVALUE(Locations[Country], "Thailand")
+		displayFolder: Context
+
+	measure 'Current Temperature' = MAX(CurrentWeather[Temperature])
+		formatString: 0.0 °C
+		displayFolder: Current Weather
+
+	measure 'Feels Like' = MAX(CurrentWeather[ApparentTemperature])
+		formatString: 0.0 °C
+		displayFolder: Current Weather
+
+	measure Humidity = DIVIDE(MAX(CurrentWeather[RelativeHumidity]), 100)
+		formatString: 0%
+		displayFolder: Current Weather
+
+	measure 'Wind Speed' = MAX(CurrentWeather[WindSpeed])
+		formatString: 0.0 km/h
+		displayFolder: Current Weather
+
+	measure 'Surface Pressure' = MAX(CurrentWeather[SurfacePressure])
+		formatString: 0 hPa
+		displayFolder: Current Weather
+
+	measure 'Visibility Km' = DIVIDE(MAX(CurrentWeather[Visibility]), 1000)
+		formatString: 0.0 km
+		displayFolder: Current Weather
+
+	measure 'Current Precipitation' = MAX(CurrentWeather[Precipitation])
+		formatString: 0.0 mm
+		displayFolder: Current Weather
+
+	measure 'Current Weather' = SELECTEDVALUE(CurrentWeather[WeatherCondition], "Unknown")
+		displayFolder: Current Weather
+
+	measure 'Weather Icon' = SELECTEDVALUE(CurrentWeather[WeatherIcon], "•")
+		displayFolder: Current Weather
+
+	measure 'Last Updated' = VAR T = MAX(CurrentWeather[UpdatedAt]) RETURN IF(ISBLANK(T), "Refresh required", "Updated " & FORMAT(T, "dd MMM yyyy HH:mm"))
+		displayFolder: Context
+
+	measure Sunrise = VAR T = MIN(DailyForecast[Sunrise]) RETURN IF(ISBLANK(T), "—", FORMAT(T, "HH:mm"))
+		displayFolder: Astronomy
+
+	measure Sunset = VAR T = MIN(DailyForecast[Sunset]) RETURN IF(ISBLANK(T), "—", FORMAT(T, "HH:mm"))
+		displayFolder: Astronomy
+
+	measure 'US AQI' = MAX(AirQuality[USAQI])
+		formatString: 0
+		displayFolder: Air Quality
+
+	measure 'European AQI' = MAX(AirQuality[EuropeanAQI])
+		formatString: 0
+		displayFolder: Air Quality
+
+	measure 'AQI Maximum' = 300
+		formatString: 0
+		displayFolder: Air Quality
+
+	measure 'AQI Target' = 100
+		formatString: 0
+		displayFolder: Air Quality
+
+	measure 'AQI Category' = VAR A = [US AQI] RETURN SWITCH(TRUE(), ISBLANK(A), "Refresh required", A <= 50, "Good", A <= 100, "Moderate", A <= 150, "Unhealthy for sensitive groups", A <= 200, "Unhealthy", A <= 300, "Very unhealthy", "Hazardous")
+		displayFolder: Air Quality
+
+	measure 'AQI Category Color' =
+			VAR A = [US AQI]
+			RETURN
+				SWITCH(
+					TRUE(),
+					ISBLANK(A), "#BDBDBD",
+					A <= 50, "#00B050",
+					A <= 100, "#1E88E5",
+					A <= 150, "#FF7B7B",
+					A <= 200, "#800000",
+					A <= 300, "#FF0000",
+					"#9B0000"
+				)
+		displayFolder: Air Quality
+
+	measure 'PM2.5' = MAX(AirQuality[PM2_5])
+		formatString: 0.0 µg/m³
+		displayFolder: Pollutants
+
+	measure PM10 = MAX(AirQuality[PM10])
+		formatString: 0.0 µg/m³
+		displayFolder: Pollutants
+
+	measure Ozone = MAX(AirQuality[Ozone])
+		formatString: 0.0 µg/m³
+		displayFolder: Pollutants
+
+	measure 'Nitrogen Dioxide' = MAX(AirQuality[NitrogenDioxide])
+		formatString: 0.0 µg/m³
+		displayFolder: Pollutants
+
+	measure 'Sulphur Dioxide' = MAX(AirQuality[SulphurDioxide])
+		formatString: 0.0 µg/m³
+		displayFolder: Pollutants
+
+	measure 'Carbon Monoxide' = MAX(AirQuality[CarbonMonoxide])
+		formatString: 0.0 µg/m³
+		displayFolder: Pollutants
+
+	measure 'Daily Max Temperature' = MAX(DailyForecast[MaxTemperature])
+		formatString: 0.0 °C
+		displayFolder: Forecast
+
+	measure 'Daily Min Temperature' = MIN(DailyForecast[MinTemperature])
+		formatString: 0.0 °C
+		displayFolder: Forecast
+
+	measure 'Rain Probability' = DIVIDE(MAX(DailyForecast[PrecipProbabilityMax]), 100)
+		formatString: 0%
+		displayFolder: Forecast
+
+	measure 'Daily Rainfall' = MAX(DailyForecast[PrecipitationSum])
+		formatString: 0.0 mm
+		displayFolder: Forecast
+
+	column Key
+		dataType: int64
+		isHidden
+		sourceColumn: Key
+
+	partition _Measures = m
+		mode: import
+		source = #table(type table [Key=Int64.Type], {{1}})
+

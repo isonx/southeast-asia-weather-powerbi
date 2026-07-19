@@ -1,0 +1,12 @@
+relationship 2bad74c0-2eb7-4299-bb59-11339d01efa2
+	fromColumn: CurrentWeather.CityKey
+	toColumn: Locations.CityKey
+
+relationship 90357550-a52f-4d06-a054-d5c598d4b5ab
+	fromColumn: DailyForecast.CityKey
+	toColumn: Locations.CityKey
+
+relationship f9f06def-9088-44fd-a91a-255b1e679dc0
+	fromColumn: AirQuality.CityKey
+	toColumn: Locations.CityKey
+

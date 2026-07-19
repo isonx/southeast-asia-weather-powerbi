@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this project, please cite it using the metadata below."
+title: "Southeast Asia Weather Intelligence Dashboard"
+type: software
+authors:
+  - family-names: Surbakti
+    given-names: Herison
+version: 1.0.0
+date-released: 2026-07-19
+license: MIT
+abstract: "An interactive Power BI weather, forecast, air-quality, and pollutant analytics dashboard for six Southeast Asian cities using Open-Meteo APIs."
+keywords:
+  - Power BI
+  - Power Query
+  - DAX
+  - weather analytics
+  - air quality
+  - Open-Meteo

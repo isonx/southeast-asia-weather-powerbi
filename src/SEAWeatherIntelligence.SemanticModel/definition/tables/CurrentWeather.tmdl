@@ -1,0 +1,111 @@
+table CurrentWeather
+
+	column CityKey
+		dataType: int64
+		isHidden
+		sourceColumn: CityKey
+
+	column UpdatedAt
+		dataType: dateTime
+		formatString: dd MMM yyyy HH:mm
+		sourceColumn: UpdatedAt
+
+	column Temperature
+		dataType: double
+		isHidden
+		formatString: 0.0 °C
+		sourceColumn: Temperature
+
+	column RelativeHumidity
+		dataType: double
+		isHidden
+		formatString: 0
+		sourceColumn: RelativeHumidity
+
+	column ApparentTemperature
+		dataType: double
+		isHidden
+		formatString: 0.0 °C
+		sourceColumn: ApparentTemperature
+
+	column IsDay
+		dataType: int64
+		isHidden
+		sourceColumn: IsDay
+
+	column Precipitation
+		dataType: double
+		isHidden
+		formatString: 0.0 mm
+		sourceColumn: Precipitation
+
+	column WeatherCode
+		dataType: int64
+		isHidden
+		sourceColumn: WeatherCode
+
+	column WeatherCondition
+		dataType: string
+		sourceColumn: WeatherCondition
+
+	column WeatherIcon
+		dataType: string
+		sourceColumn: WeatherIcon
+
+	column SurfacePressure
+		dataType: double
+		isHidden
+		formatString: 0 hPa
+		sourceColumn: SurfacePressure
+
+	column WindSpeed
+		dataType: double
+		isHidden
+		formatString: 0.0 km/h
+		sourceColumn: WindSpeed
+
+	column Visibility
+		dataType: double
+		isHidden
+		formatString: 0 m
+		sourceColumn: Visibility
+
+	partition CurrentWeather = m
+		mode: import
+		source =
+				let
+				    Loc = Table.ToRecords(LocationsBase),
+				    Raw = ForecastResponse,
+				    Rows = List.Transform(List.Positions(Raw), (i) =>
+				        let
+				            R = Raw{i},
+				            C = R[current],
+				            Code = try Number.From(C[weather_code]) otherwise null,
+				            DayFlag = try Number.From(C[is_day]) otherwise null
+				        in
+				            [
+				                CityKey = Loc{i}[CityKey],
+				                UpdatedAt = try DateTime.FromText(C[time]) otherwise null,
+				                Temperature = try Number.From(C[temperature_2m]) otherwise null,
+				                RelativeHumidity = try Number.From(C[relative_humidity_2m]) otherwise null,
+				                ApparentTemperature = try Number.From(C[apparent_temperature]) otherwise null,
+				                IsDay = DayFlag,
+				                Precipitation = try Number.From(C[precipitation]) otherwise null,
+				                WeatherCode = Code,
+				                WeatherCondition = fxWeatherDescription(Code),
+				                WeatherIcon = fxWeatherIcon(Code, DayFlag),
+				                SurfacePressure = try Number.From(C[surface_pressure]) otherwise null,
+				                WindSpeed = try Number.From(C[wind_speed_10m]) otherwise null,
+				                Visibility = try Number.From(C[visibility]) otherwise null
+				            ]
+				    ),
+				    T = Table.FromRecords(Rows),
+				    Typed = Table.TransformColumnTypes(T, {
+				        {"CityKey", Int64.Type}, {"UpdatedAt", type datetime}, {"Temperature", type number},
+				        {"RelativeHumidity", type number}, {"ApparentTemperature", type number}, {"IsDay", Int64.Type},
+				        {"Precipitation", type number}, {"WeatherCode", Int64.Type}, {"WeatherCondition", type text},
+				        {"WeatherIcon", type text}, {"SurfacePressure", type number}, {"WindSpeed", type number}, {"Visibility", type number}
+				    })
+				in
+				    Typed
+
