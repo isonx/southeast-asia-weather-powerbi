@@ -237,5 +237,5 @@ Weather and air-quality data are provided by [Open-Meteo.com](https://open-meteo
 
 ## Author
 
-**Herison Surbakti**  
+**[Herison Surbakti](https://www.linkedin.com/in/herisonsurbakti/)**  
 Power BI, data analytics, business intelligence, and applied data research portfolio project.
