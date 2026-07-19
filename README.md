@@ -199,7 +199,7 @@ These are custom dashboard colors; the category thresholds follow the US AQI sca
     ├── DASHBOARD_GUIDE.md
     ├── REFRESH_GUIDE.md
     ├── TROUBLESHOOTING.md
-    └── GITHUB_UPLOAD_GUIDE.md
+    
 ```
 
 ## Technical stack
